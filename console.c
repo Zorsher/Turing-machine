@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define A0 220
+
 struct String {
-    char* data;
+    unsigned char* data;
     int length;
     int capacity;
 };
@@ -18,7 +20,7 @@ struct String getAlphabet() {
     string.capacity = 10;
     string.length = 1;
     string.data = malloc(string.capacity * sizeof(char));
-    string.data[0] = -1;
+    string.data[0] = A0;
 
     int step = 10;
 
@@ -26,6 +28,11 @@ struct String getAlphabet() {
     {
         printf("Enter a value: ");
         string.data[string.length] = getChar();
+
+        if (string.data[string.length] == '#') {
+            printf("Error! You put a reserve symbol '#'. Try again!\n");
+            continue;
+        }
 
         if (string.data[string.length] == '\0') {
             break;
@@ -42,7 +49,7 @@ struct String getAlphabet() {
     return string;
 }
 
-int findAlphabetSymbol(struct String alphabet, char symbol) {
+int findAlphabetSymbol(struct String alphabet, unsigned char symbol) {
     int index = -1;
     
     for (int i = 0; i < alphabet.length; i++) {
@@ -57,13 +64,12 @@ int findAlphabetSymbol(struct String alphabet, char symbol) {
 
 void printAlphabet(struct String alphabet, char separator, char endLine) {
     for (int i = 0; i < alphabet.length; i++) {
-        if (alphabet.data[i] == -1) {
+        if (alphabet.data[i] == A0) {
             printf("a0%c", separator);
         } else {
             printf("%c%c", alphabet.data[i], separator);
         }
     }
-
     printf("%c", endLine);
 }
 
@@ -86,7 +92,7 @@ struct String getLine() {
             break;
         }
 
-        *(string.data + string.length) = symbol;
+        string.data[string.length] = symbol;
 
         string.length++;
 
@@ -95,7 +101,6 @@ struct String getLine() {
             string.data = realloc(string.data, (string.capacity));
         }  
     }
-
     return string;
 }
 

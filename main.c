@@ -4,7 +4,7 @@
 
 struct Rule
 {
-    struct String item;
+    unsigned char item;
     int move;
     int state;
 };
@@ -12,42 +12,44 @@ struct Rule
 struct Rule createRule(struct String alphabet, int eventsCount) {
     struct Rule rule;
     struct String string;
+    char symbol;
     
     while (1) {
-        printf("Alphabet value: ");
-        string = getLine();
+        printf("Enter alphabet symbol: ");
 
-        if (!strcmp("a0", string.data) || atoi(string.data) == -1) {
-            rule.item.data = NULL;
+        symbol = getChar();
+
+        // состояние a0
+        if (symbol == '#') {
+            rule.item = A0;
             break;
         }
-        
-        if (strstr(alphabet.data, string.data) != NULL) {
-            rule.item = string;
+            
+        if (strchr(alphabet.data, symbol) != NULL) {
+            rule.item = symbol;
             break;
         }
 
-        printf("ERROR: you put a wrong value (%s)\n", string.data);
+        printf("ERROR: you put a wrong value (%c)\n", symbol);
     }
 
     while (1)
     {
         printf("Enter action (L, S, R): ");
-        char action = getChar();
+        symbol = getChar();
 
-        
-        if (action == 'L') {
+        if (symbol == 'L') {
             rule.move = -1;
             break;
-        } else if (action == 'S') {
+        } else if (symbol == 'S') {
             rule.move = 0;
             break;
-        } else if (action == 'R') {
+        } else if (symbol == 'R') {
             rule.move = 1;
             break;
         }
         
-        printf("ERROR: you put a wrong action (%s)\n", string.data);
+        printf("ERROR: you put a wrong action (%c)\n", symbol);
     }
 
     while (1)
@@ -60,13 +62,12 @@ struct Rule createRule(struct String alphabet, int eventsCount) {
             break;
         }
 
-        printf("ERROR: you put a wrong event number (%s)", string);        
+        printf("ERROR: you put a wrong event number (%s)", string.data);        
     }
 
     printf("\n");
     free(string.data);
     
-
     return rule;
 }
 
@@ -75,19 +76,18 @@ struct Rule** createRules(struct String alphabet, int eventsCount) {
     struct Rule** rules = malloc(eventsCount * sizeof(struct Rule*));
 
     for (int i = 0; i < eventsCount; i++) {
-        *(rules + i) = malloc(alphabet.length * sizeof(struct Rule));
+        // *(rules + i) = malloc(alphabet.length * sizeof(struct Rule));
+        rules[i] = malloc(alphabet.length * sizeof(struct Rule));
         for (int j = 0; j < alphabet.length; j++) {
             // нужно добавить проверку на вводимые пользовательские данные
-            printf("State q%d, Character ", i+1);
-
-            if (alphabet.data[j] == -1) {
-                printf("a0\n");
+	        printf("State q%d ",i+1);
+            if (alphabet.data[j] == A0) {
+                printf("symbol a0\n");
             } else {
-                printf("%c\n", alphabet.data[j]);
+                printf("symbol %c\n", alphabet.data[j]);
             }
-
-            *(*(rules + i) + j) = createRule(alphabet, eventsCount);
-
+            // *(*(rules + i) + j) = createRule(alphabet, eventsCount);
+            rules[i][j] = createRule(alphabet, eventsCount);
             // printf("put: %s; Move: %i; q:%i\n", (*(*(rules + i) + j)).item.data, (*(*(rules + i) + j)).move, (*(*(rules + i) + j)).state);
         }
     }
@@ -95,22 +95,10 @@ struct Rule** createRules(struct String alphabet, int eventsCount) {
     return rules;
 }
 
-struct Rule findRule(struct Rule** rules, int row, char column) {
-    // struct Rule rule;
-
-    // for (int i = 0; i < row; i++) {
-    //     for (int j = 0; j < column; j++) {
-    //         rule = rules[i][j];
-    //     }
-    // }
-
-    return rules[row][column];
-}
-
 void freeRules(struct Rule** rules, int alphabetLength, int eventsCount) {
     for (int i = 0; i < eventsCount; i++) {
         for (int j = 0; j < alphabetLength; j++) {
-            free((rules[i][j]).item.data);
+            // free((rules[i][j]).item.data);
         }
         free(rules[i]);
     }
@@ -128,7 +116,7 @@ void printRules(struct Rule** rules, struct String alphabet, int eventsCount) {
         for (int j = 0; j < alphabet.length; j++) {
             struct Rule rule = rules[i][j];
 
-            printf("\t%s%cq%d", rule.item.data, symbols[rule.move+1], rule.state);
+            printf("\t%c%cq%d", rule.item, symbols[rule.move+1], rule.state);
         }
         printf("\n");
     }
@@ -138,18 +126,10 @@ void process(struct Tape* head, struct Rule** rules, struct String alphabet) {
     int state = 1;
     struct Rule rule;
 
-    while (state != 0)
-    {
-        printf("row: %d, column %d (%c)\n", state, findAlphabetSymbol(alphabet, head->item), head->item);
-        getchar();
-        rule = findRule(rules, state-1, findAlphabetSymbol(alphabet, head->item));
+    while (state != 0) {
+        rule = rules[state-1][findAlphabetSymbol(alphabet, head->item)];
 
-        printf("ITEM: %s, Move: %d, STATE: %d", rule.item.data, rule.move, rule.state);
-
-        getchar();
-
-
-        head->item = rule.item.data[0];
+        head->item = rule.item;
         state = rule.state;
 
         if (rule.move == -1) {
@@ -158,7 +138,7 @@ void process(struct Tape* head, struct Rule** rules, struct String alphabet) {
                 head->left = lHead;
                 lHead->right = head;
                 lHead->left = NULL;
-                lHead->item = -1;
+                lHead->item = A0;
             }
             head = head->left;
         } else if (rule.move == 1) {
@@ -167,19 +147,15 @@ void process(struct Tape* head, struct Rule** rules, struct String alphabet) {
                 head->right = rHead;
                 rHead->left = head;
                 rHead->right = NULL;
-                rHead->item = -1;
+                rHead->item = A0;
             }
             head = head->right;
         }
-
     }
-    
-
 }
 
 int main() {
     struct String alphabet = getAlphabet();
-    // printAlphabet(alphabet, ' ', '\n');
     int eventsCount = getInt("Enter a events count: ");
     
     struct Rule** rules = createRules(alphabet, eventsCount);
@@ -188,7 +164,6 @@ int main() {
 
     struct Tape* head = malloc(sizeof(struct Tape));
     fillTape(head);
-    printTape(head);
 
     // надо сделать проверку на идиота
     int startPos = getInt("Enter a start position: ");
@@ -201,12 +176,9 @@ int main() {
     }
     
     process(head, rules, alphabet);
-
     printTape(head);
 
     freeRules(rules, alphabet.length, eventsCount);
     free(alphabet.data);
     freeTape(head);
-    
 }
-
