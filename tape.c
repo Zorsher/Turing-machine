@@ -1,23 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "console.c"
-
-// Tape как абстракция над Cell - ячейкой плёнки + функции: заполнение, печать, высвобождение памяти, сохранение, загрузка
-// ЧТО ЭТО ЧЁ КОМЕНТЫ В СИ? КОГДА КРУЖОЧКИ?
-struct Tape
-{
-    unsigned char item;
-    struct Tape* left;
-    struct Tape* right;
-
-};
-// флаг означающий наличие символа?
-
+#include "tape.h"
 
 void fillTape(struct Tape* head) {
     printf("Enter a tape word: ");
     struct String string = getLine();
     head->left = NULL;
+    head->right = NULL;
 
     for (int i = 0; i < string.length; i++) {        
         head->item = string.data[i];
