@@ -4,3 +4,5 @@ struct Rule
     int move;
     int state;
 };
+
+void printRules(struct Rule** rules, struct String alphabet, int eventsCount);

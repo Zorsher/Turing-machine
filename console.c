@@ -63,6 +63,34 @@ void freeString(struct String* string) {
     free(string);
 }
 
+int* getFormulaValues(){
+    int result[2] = {-1, -1};
+    int* resultP = result;
+    
+    struct String mulValue;
+    struct String addValue;
+    struct String string = getLine();
+
+
+    int mulP = findStringSymbol(string,'*');
+    int addP = findStringSymbol(string,'+');
+
+    if (mulP == -1 || addP==-1){
+        printf("ERROR, WRONG FORMULA.EXAMPLE: 23*n+346");
+        return resultP;
+    }
+
+    cropString(&string, &mulValue, 0, mulP);
+    cropString(&string, &addValue, addP+1, string.length);
+
+    resultP[0]=atoi(mulValue.data);
+    resultP[1]=atoi(addValue.data);
+
+    free(string.data);
+
+    return resultP;
+}
+
 struct String getAlphabet() {
     struct String string;
 
@@ -132,7 +160,7 @@ struct String getAlphabetFromString(struct String string) {
 
 void printAlphabet(struct String alphabet, char separator, char endLine) {
     for (int i = 0; i < alphabet.length; i++) {
-        if (alphabet.data[i] == A0) {
+        if (alphabet.data[i] == A0 || alphabet.data[i] == '#') {
             printf("a0%c", separator);
         } else {
             printf("%c%c", alphabet.data[i], separator);
