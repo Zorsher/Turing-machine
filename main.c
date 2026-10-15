@@ -4,6 +4,71 @@
 // #include "rules.c"
 #include "machine.c"
 
+
+void fillTape(struct Tape* head) {
+    printf("Enter a tape word: ");
+    struct String string = getLine();
+    head->left = NULL;
+    head->right = NULL;
+
+    for (int i = 0; i < string.length; i++) {        
+        head->item = string.data[i];
+
+        if (i + 1 != string.length) {
+            struct Tape* next = malloc(sizeof(struct Tape));
+            head->right = next;
+            next->left = head;
+            next->right = NULL;
+            head = head->right;
+        } 
+    }
+    free(string.data);
+}
+
+struct Tape* getHead(struct Tape* tape) {
+    while (tape->left != NULL) {
+        tape = tape->left;
+    }
+    return tape;
+}
+
+void printTape(struct Tape* head) {
+    struct Tape* start = getHead(head);
+
+    while (start != NULL) {
+        if (start->item == '#' || start->item == A0) {
+
+        } else {
+            printf("%c", start->item);
+
+        }
+
+        start = start->right;
+    }
+}
+
+void freeTape(struct Tape* head) {
+    struct Tape* tmp;
+    head = getHead(head);
+
+    while (1)
+    {
+        tmp = head->right;
+        
+        if (head->right == NULL) {
+            free(head);
+            break;
+        }
+
+        free(head);
+
+        head = tmp;
+    } 
+}
+
+
+
+
 // void process(struct Tape* head, struct Rule** rules, struct String alphabet) {
 //     int state = 1;
 //     struct Rule rule;
@@ -47,11 +112,33 @@
 
 
 int main() {
+    struct Tape* head = malloc(sizeof(struct Tape));
+    fillTape(head);
+    // int startPos = getInt("Enter a start position: ");
+
+    printf("Enter a formula (a*n+b): ");
+
     struct Machine* machine = generate();
+    printRules(machine->rules, *machine->alphabet, machine->states);
+
+
+    struct Tape* current = head;
+
+    while (current->right != NULL) {
+        current = current->right;
+    }
+
+    process(machine, current, 0, 0, -1);
+    printTape(head);
+
+    // printf("DLINA %d\n", machine->alphabet->length);
+    // process(machine, head, machine->alphabet->length, 0, -1);
+    // printTape(head);
 
     // printf("%c %d %d", machine->rules[0][0].item, machine->rules[0][0].move, machine->rules[0][0].state);
 
-    printRules(machine->rules, *machine->alphabet, machine->states);
+
+
 
     // struct String alphabet = getAlphabet();
     // int eventsCount = getInt("Enter a events count: ");
@@ -60,11 +147,8 @@ int main() {
     // printRules(rules, alphabet, eventsCount);
 
 
-    // struct Tape* head = malloc(sizeof(struct Tape));
-    // fillTape(head);
 
     // // надо сделать проверку на идиота
-    // int startPos = getInt("Enter a start position: ");
 
     // for (int i = 0; i < startPos; i++) {
     //     if (head->right == NULL) {
@@ -74,7 +158,6 @@ int main() {
     // }
     
     // process(head, rules, alphabet);
-    // printTape(head);
 
     // freeRules(rules, alphabet.length, eventsCount);
     // free(alphabet.data);

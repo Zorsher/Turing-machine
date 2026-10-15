@@ -47,8 +47,10 @@ int process(struct Machine* machine, struct Tape* head, int startPos, int startS
     
 
     while (state != finishState) {
-        row = state - 1;
+        row = state;
         column = findStringSymbol(*machine->alphabet, head->item);
+
+        // printf("FIND ROW %d, FIND COLUMN %d SYMBOL %c\n", row, column, head->item);
 
         if (row < 0 || column == -1) {
             printf("ERROR, INVALID ROWS AND COLUMNS. EXITING.");

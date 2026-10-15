@@ -5,6 +5,11 @@
 
 int findStringSymbol(struct String string, unsigned char symbol) {
     int index = -1;
+
+    if (symbol == '#' || symbol == A0) {
+        return 0;
+    }
+
     
     for (int i = 0; i < string.length; i++) {
         if (string.data[i] == symbol) {
